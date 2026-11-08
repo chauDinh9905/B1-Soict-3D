@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # B1Web – Website 3D tham quan ĐH Bách khoa Hà Nội
 
 Giai đoạn 1: khu vực quanh nhà B1. Kế hoạch đầy đủ: [`docs/PLAN.md`](docs/PLAN.md).
@@ -34,3 +35,7 @@ blender -b blender/buildings/b1/B1.blend -P blender/tools/export_glb.py -- B1_Bu
 | `.claude/` | Ghi chú thiết kế mô hình B1 cho trợ lý AI | Làm khối |
 
 Chi tiết từng phần: đọc `README.md` trong thư mục đó.
+=======
+# B1-Soict-3D
+Bài tập lớn học phần IT4409 - Công nghệ web và dịch vụ trực tuyến
+>>>>>>> 57505405d60e543965ef67e0c1a13248697dfee9
