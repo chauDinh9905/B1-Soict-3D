@@ -2,9 +2,11 @@
 node_modules/
 dist/
 .vite/
-# Bí mật & dữ liệu chạy thử
+# Bí mật & dữ liệu chạy thử – mọi file .env* trừ file mẫu
 .env
-.env.*.local
+.env.*
+!.env.example
+!.env.*.example
 server/data/*.db
 server/data/*.db-*
 # Blender

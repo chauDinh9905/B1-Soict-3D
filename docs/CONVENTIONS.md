@@ -44,3 +44,6 @@ Mỗi tòa nhà xuất **một** file: `web/public/models/buildings/<id>/<id>.gl
 - Backend: module trong `server/src/modules/` không import lẫn nhau; dùng chung thì để ở `db/`, `middleware/`, `shared/`.
 - Đổi API → sửa `docs/API.md` trước.
 - Backend: mỗi API mới có ít nhất một test trong `server/tests/`.
+- Backend: đổi lược đồ CSDL → **file migration mới** trong `server/migrations/`; không sửa file đã merge.
+- Backend: biến môi trường mới → thêm vào `server/src/config.js` (kiểm tra bằng zod) **và** `server/.env.example` kèm chú thích.
+- PR đụng `modules/auth`, `middleware/session.js`, `shared/password.js` cần **2 người duyệt**.

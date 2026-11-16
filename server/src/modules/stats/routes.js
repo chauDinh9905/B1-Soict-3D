@@ -1,15 +1,18 @@
 import { Router } from 'express';
-import { requireAdmin } from '../../middleware/requireAdmin.js';
+import { query } from '../../infra/db.js';
+import { requireRole } from '../../middleware/requireRole.js';
 
-export function statsRoutes(db) {
+export function statsRoutes() {
   const r = Router();
-  r.post('/visit', (_req, res) => {
-    db.prepare(`INSERT INTO visits (day, count) VALUES (date('now'), 1)
-                ON CONFLICT(day) DO UPDATE SET count = count + 1`).run();
+  // Cộng 1 nguyên tử: nhiều request cùng lúc vẫn đếm đúng.
+  r.post('/visit', async (_req, res) => {
+    await query(`INSERT INTO visits (day, count) VALUES (current_date, 1)
+                 ON CONFLICT (day) DO UPDATE SET count = visits.count + 1`);
     res.status(204).end();
   });
-  r.get('/', requireAdmin, (_req, res) => {
-    res.json(db.prepare('SELECT day, count FROM visits ORDER BY day DESC LIMIT 60').all());
+  r.get('/', requireRole('admin'), async (_req, res) => {
+    const { rows } = await query('SELECT day::text AS day, count FROM visits ORDER BY day DESC LIMIT 60');
+    res.json(rows);
   });
   return r;
 }

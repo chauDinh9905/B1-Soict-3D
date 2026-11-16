@@ -18,3 +18,4 @@ CSS riêng của feature để cạnh nó (`hotspots.css`) và import trong file
 | tour | TODO | |
 | minimap | TODO | |
 | feedback | TODO (cần backend) | |
+| auth | phát `auth:changed` khi mở trang; form = TODO | |

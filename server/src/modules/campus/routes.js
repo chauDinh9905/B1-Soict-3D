@@ -1,11 +1,12 @@
 import { Router } from 'express';
+import { query } from '../../infra/db.js';
 
 /** GET /api/campus -> { name, buildings: ['b1', ...] } (cùng hình dạng web/public/data/campus.json) */
-export function campusRoutes(db) {
+export function campusRoutes() {
   const r = Router();
-  r.get('/', (_req, res) => {
-    const ids = db.prepare('SELECT id FROM buildings WHERE enabled = 1 ORDER BY sort_order').all().map((b) => b.id);
-    res.json({ name: 'Đại học Bách khoa Hà Nội', buildings: ids });
+  r.get('/', async (_req, res) => {
+    const { rows } = await query('SELECT id FROM buildings WHERE enabled ORDER BY sort_order');
+    res.json({ name: 'Đại học Bách khoa Hà Nội', buildings: rows.map((b) => b.id) });
   });
   return r;
 }

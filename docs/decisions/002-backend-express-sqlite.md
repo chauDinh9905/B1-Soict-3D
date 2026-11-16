@@ -1,4 +1,7 @@
 # 002 – Backend dùng Node.js + Express + SQLite (node:sqlite)
+
+> **ĐÃ ĐƯỢC THAY THẾ** bởi [004 – PostgreSQL thay SQLite](004-postgres-thay-sqlite.md). Giữ lại để biết lịch sử quyết định.
+
 **Bối cảnh:** nhóm muốn có backend để học, dữ liệu nhỏ (vài tòa nhà, vài chục điểm thông tin, góp ý).
 **Quyết định:**
 - Node.js + Express: cùng ngôn ngữ JavaScript với frontend, các thành viên hỗ trợ nhau được.

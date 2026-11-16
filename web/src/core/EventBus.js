@@ -5,6 +5,7 @@
  *   world:ready  world            building:loaded  building
  *   poi:click   poi              camera:flyTo {position,target}
  *   nav:mode    'orbit'|'walk'
+ *   auth:changed user|null         (đăng nhập / đăng xuất)
  *   api:offline                    (backend không phản hồi, đang dùng dữ liệu tĩnh)
  */
 export class EventBus {

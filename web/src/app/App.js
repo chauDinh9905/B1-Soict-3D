@@ -11,6 +11,7 @@ import { InfoPanelFeature } from '../features/info-panel/InfoPanelFeature.js';
 import { TourFeature } from '../features/tour/TourFeature.js';
 import { MinimapFeature } from '../features/minimap/MinimapFeature.js';
 import { FeedbackFeature } from '../features/feedback/FeedbackFeature.js';
+import { AuthFeature } from '../features/auth/AuthFeature.js';
 import { setupDebug } from '../shared/debug.js';
 
 /**
@@ -25,6 +26,7 @@ const FEATURES = [
   TourFeature,
   MinimapFeature,
   FeedbackFeature,
+  AuthFeature,
 ];
 
 export class App {

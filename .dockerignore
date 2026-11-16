@@ -1,0 +1,13 @@
+# Build context là gốc repo – chỉ gửi những gì Dockerfile cần
+**/node_modules
+**/.env
+**/.env.*
+.git
+blender
+docs
+web/node_modules
+web/dist
+web/src
+web/public/models
+server/tests
+server/data
