@@ -4,7 +4,6 @@
 
 # File nặng -> Git LFS (mỗi máy chạy `git lfs install` một lần)
 *.blend filter=lfs diff=lfs merge=lfs -text
-*.glb   filter=lfs diff=lfs merge=lfs -text
 *.hdr   filter=lfs diff=lfs merge=lfs -text
 *.exr   filter=lfs diff=lfs merge=lfs -text
 *.ktx2  filter=lfs diff=lfs merge=lfs -text
