@@ -10,7 +10,10 @@ export class LoadingFeature {
     const bar = this.el.querySelector('span');
     this.off = [
       bus.on('load:progress', ({ loaded, total }) => { bar.style.width = `${(loaded / total) * 100}%`; }),
-      bus.on('world:ready', () => this.el.classList.add('is-done')),
+      bus.on('world:ready', () => {
+        this.el.classList.add('is-done');
+        setTimeout(() => this.el.remove(), 500); // gỡ hẳn lớp phủ để không chặn chuột
+      }),
     ];
   }
   dispose() { this.off.forEach((f) => f()); this.el.remove(); }
