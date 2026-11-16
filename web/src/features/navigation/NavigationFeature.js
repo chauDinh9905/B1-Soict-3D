@@ -1,5 +1,6 @@
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { WalkMode } from './WalkMode.js';
+import * as THREE from 'three';
 
 /**
  * Điều hướng: 2 chế độ.
@@ -13,21 +14,26 @@ export class NavigationFeature {
     this.orbit = new OrbitControls(engine.camera, engine.renderer.domElement);
     this.orbit.target.set(...config.CAMERA.target);
     this.orbit.enableDamping = true;
-    this.orbit.maxPolarAngle = Math.PI * 0.49; // không cho chui xuống dưới đất
     this.orbit.minDistance = 5;
     this.orbit.maxDistance = 400;
 
-    this.walk = new WalkMode(ctx);
-    this.mode = 'orbit';
+    // Cho phép nhìn từ dưới lên như Blender (Math.PI = lật hẳn xuống dưới).
+    // Muốn giữ camera trên mặt đất thì đặt lại Math.PI * 0.49.
+    this.orbit.maxPolarAngle = Math.PI * 0.49;
 
-    this.off = [
-      bus.on('nav:mode', (m) => this.setMode(m)),
-      bus.on('camera:flyTo', ({ position, target }) => {
-        // TODO: tween bằng gsap hoặc dùng damp() trong shared/math.js
-        engine.camera.position.copy(position);
-        this.orbit.target.copy(target);
-      }),
-    ];
+    // Nút chuột kiểu Blender: giữa = xoay, phải = kéo dời; vẫn giữ chuột trái = xoay cho người quen web.
+    this.orbit.mouseButtons = {
+      LEFT: THREE.MOUSE.ROTATE,
+      MIDDLE: THREE.MOUSE.ROTATE,
+      RIGHT: THREE.MOUSE.PAN,
+    };
+    this.orbit.screenSpacePanning = true; // kéo dời theo mặt phẳng màn hình, giống Blender
+
+    // Xoay quanh tâm thật của tòa nhà thay vì điểm cố định
+    bus.on('building:loaded', (b) => {
+      const center = new THREE.Box3().setFromObject(b.root).getCenter(new THREE.Vector3());
+      this.orbit.target.copy(center);
+    });
   }
 
   setMode(m) {
