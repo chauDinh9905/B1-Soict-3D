@@ -51,7 +51,8 @@ Hình dạng `GET /campus` và `GET /buildings/:id` phải **giống hệt** fil
 | POST | `/auth/login` | `{ email, password }` | `200 { user }` + cookie | `401 INVALID_CREDENTIALS`, `429 RATE_LIMITED` | xong |
 | POST | `/auth/logout` | Xóa session hiện tại (gọi khi chưa đăng nhập cũng được) | `204` | – | xong |
 | GET | `/auth/me` 🔐 | Người đang đăng nhập | `200 { user }` | `401 UNAUTHENTICATED`, `401 SESSION_EXPIRED` | xong |
-| | `/auth/verify-email`, `/auth/password/*`, `/auth/google`, `/auth/sessions` | Giai đoạn B – xem `BACKEND_PLAN.md` mục 8.1 | | | TODO |
+| | `/auth/verify-email`, `/auth/password/*`, `/auth/sessions` | Giai đoạn B – xem `BACKEND_PLAN.md` mục 8.1 | | | TODO |
+| | `/auth/google` | Để sau giai đoạn này, chưa có hợp đồng triển khai | | | Chưa lên lịch |
 
 Đối tượng `user` – **không bao giờ** có mật khẩu hay hash:
 ```json

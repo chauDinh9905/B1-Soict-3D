@@ -10,6 +10,10 @@
 
 > **Tinh thần chung:** làm nhỏ nhưng làm trọn vẹn, và hiểu từng dòng mình viết. Mỗi tuần phải có một bản chạy được trên trình duyệt, dù còn xấu. Tính năng trước chưa xong thì chưa thêm tính năng sau.
 
+> **Cập nhật backend 18/11/2026:** Phạm vi, công nghệ và phân công backend hiện hành nằm trong
+> [BACKEND_PLAN.md](BACKEND_PLAN.md) và ADR 004–006. Các đoạn nói SQLite hoặc không có tài khoản
+> phía dưới ghi lại kế hoạch ban đầu; khi làm backend, theo quyết định mới và mục 2, 7 đã cập nhật ở đây.
+
 ---
 
 ## Mục lục
@@ -80,10 +84,10 @@ Bản tham khảo "những thứ cần cài và chức năng website mẫu" **ch
 
 | Mức | Frontend | Backend | Làm khối |
 |---|---|---|---|
-| **Must** (MVP) | Nạp B1 + màn hình tải · Xoay quanh (orbit) · Ánh sáng, bầu trời, bóng · Hotspot + bảng thông tin · Nút góc nhìn có sẵn | API đọc tòa nhà và điểm thông tin · CSDL SQLite + dữ liệu mẫu · Test cơ bản | B1 xuất `.glb` đạt ngân sách hiệu năng · Đặt `POI_*` và `Cam_*` |
-| **Should** | Đi bộ góc nhìn người có va chạm · Chuyển cảnh mượt · Minimap · Dùng được trên điện thoại · Form góp ý | API thêm/sửa/xóa điểm thông tin (có token quản trị) · API góp ý · Trang quản trị | Mesh va chạm `COL_*` · Khối đơn giản cho nhà xe B1, A17, đường từ OSM |
-| **Could** | Tour tự động có chú thích · Ngày/đêm · Âm thanh nền | Thống kê lượt xem trên trang quản trị · Chống spam góp ý | Cây, ghế, xe (đối tượng lặp lại) · Bake texture vết bẩn |
-| **Won't** (giai đoạn 1) | Bên trong tòa nhà · Nhiều tòa nhà · VR | Tài khoản người dùng, đăng nhập nhiều vai trò | Mô hình các tòa khác |
+| **Must** (MVP) | Nạp B1 + màn hình tải · Xoay quanh (orbit) · Ánh sáng, bầu trời, bóng · Hotspot + bảng thông tin · Nút góc nhìn có sẵn | API đọc tòa nhà/POI · PostgreSQL + dữ liệu mẫu · Đăng ký/đăng nhập bằng email + mật khẩu · Session Redis · Vai trò `user`/`admin` · Test cơ bản | B1 xuất `.glb` đạt ngân sách hiệu năng · Đặt `POI_*` và `Cam_*` |
+| **Should** | Đi bộ góc nhìn người có va chạm · Chuyển cảnh mượt · Minimap · Dùng được trên điện thoại · Form góp ý | API thêm/sửa/xóa POI có quyền admin · API góp ý · Trang quản trị · Xác thực email · Quên/đổi mật khẩu · Quản lý phiên đăng nhập · Outbox email | Mesh va chạm `COL_*` · Khối đơn giản cho nhà xe B1, A17, đường từ OSM |
+| **Could** | Tour tự động có chú thích · Ngày/đêm · Âm thanh nền | Thống kê lượt xem · Chống spam góp ý · Thử k3d/Kafka trên máy sau khi Must/Should hoàn tất | Cây, ghế, xe (đối tượng lặp lại) · Bake texture vết bẩn |
+| **Won't** (giai đoạn này) | Bên trong tòa nhà · Nhiều tòa nhà · VR | Đăng nhập Google · 2FA · Microservice · Kubernetes/Kafka trên production | Mô hình các tòa khác |
 
 ---
 
@@ -97,7 +101,7 @@ Bản tham khảo "những thứ cần cài và chức năng website mẫu" **ch
 | Định dạng 3D | glTF 2.0 nhị phân (`.glb`) nén Draco | Chuẩn của web 3D, Three.js đọc trực tiếp |
 | Frontend | **Three.js thuần + Vite + JavaScript**, UI bằng HTML/CSS | Ít lớp trừu tượng, đọc code là thấy renderer, scene, camera, vòng lặp (xem `docs/decisions/001-…`) |
 | Backend | **Node.js + Express 5** | Cùng ngôn ngữ JavaScript với frontend, hỗ trợ nhau được |
-| CSDL | **SQLite** qua `node:sqlite` có sẵn trong Node | CSDL là một file, không cài máy chủ CSDL, không cần trình biên dịch C++ trên Windows (xem `docs/decisions/002-…`) |
+| CSDL | **PostgreSQL 17** qua `pg` | Dữ liệu nội dung và tài khoản dùng chung khi chạy nhiều bản sao server; xem ADR 004 |
 | Kiểm thử backend | `node:test` có sẵn | Không cài thêm thư viện |
 
 Frontend luôn có dữ liệu tĩnh dự phòng trong `web/public/data`. Vì vậy **frontend không phải chờ backend**: tuần đầu đã chạy được, và bản deploy chỉ có frontend vẫn hoạt động.
@@ -317,6 +321,12 @@ Chia theo tầng (làm khối, frontend, backend) cho rõ trách nhiệm. Fronte
 | **TV3 – Frontend 3D tương tác** | Frontend | Orbit, chế độ đi bộ, va chạm, chuyển cảnh camera, tour | TV2 | `features/navigation`, `features/tour` |
 | **TV4 – Frontend giao diện** | Frontend | Hotspot, bảng thông tin, minimap, form góp ý, trang quản trị, giao diện điện thoại | TV5 | `features/hotspots`, `info-panel`, `minimap`, `feedback`, `web/admin`, `ui/`, `styles/` |
 | **TV5 – Backend + dữ liệu** | Backend | API, CSDL, xác thực quản trị, góp ý, thống kê, test, deploy backend. Giữ `docs/API.md`. Phụ trách nội dung điểm thông tin (kiểm chứng nguồn) | TV4 | `server/`, `docs/API.md`, `web/public/data` |
+
+Trên nhánh `dtm`, người phụ trách backend đảm nhận **cả BE1 và BE2** theo
+[phân công backend](BACKEND_PLAN.md#18-phân-công): PostgreSQL, API, auth, session Redis,
+test, Docker, CI, deploy và email. BE1 giữ quyền chạy script tạo admin đầu tiên;
+TV4 phối hợp giao diện và duyệt hợp đồng API. Mốc tải khối B1 được ưu tiên trước
+Must của tài khoản, rồi đến Should; Google để sau giai đoạn này.
 
 Chỗ nối giữa các tầng cần hai người cùng ngồi làm:
 

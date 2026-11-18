@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Dự án** | B1Web – Website 3D tham quan ĐH Bách khoa Hà Nội |
-| **Phạm vi tài liệu** | Đăng ký / đăng nhập (email + mật khẩu, tùy chọn tài khoản Google), lưu phiên đăng nhập, nhiều người dùng cùng lúc; vai trò của Docker, Kubernetes, Kafka |
+| **Phạm vi tài liệu** | Đăng ký / đăng nhập bằng email + mật khẩu, lưu phiên đăng nhập, nhiều người dùng cùng lúc; vai trò của Docker, Kubernetes, Kafka. Google để sau giai đoạn này |
 | **Đặt tại** | `docs/BACKEND_PLAN.md`, đi cùng `docs/PLAN.md` và kế hoạch "Tải khối B1 theo khu vực" |
 | **Ngày lập** | 16/11/2026 – đầu tuần 6, theo lịch tuần 1 = 12/10/2026 |
 | **Thời lượng** | Tuần 6–11 làm, tuần 12 đệm (16/11/2026 – 03/01/2027) |
@@ -89,7 +89,7 @@ Kế hoạch của Nam có câu "Không thêm thư viện mới". Kế hoạch n
 | Mức | Tính năng | Hạ tầng |
 |---|---|---|
 | **Must** | Đăng ký, đăng nhập, đăng xuất, `GET /me` · Băm mật khẩu bằng scrypt · Session lưu trên Redis, cookie `httpOnly` · Giới hạn số lần thử đăng nhập · Vai trò `user` / `admin` thay `ADMIN_TOKEN` · Chuyển CSDL sang PostgreSQL | Docker compose cho môi trường dev (Postgres, Redis, Mailpit) · Deploy backend + Postgres + Redis · Vercel chuyển tiếp `/api` để cookie là cookie cùng trang |
-| **Should** | Xác thực email · Quên / đặt lại mật khẩu · Đăng nhập bằng tài khoản Google · Xem và đăng xuất các thiết bị khác · Đổi mật khẩu, xóa tài khoản | Hàng đợi email bằng bảng outbox + tiến trình worker · Đo tải bằng k6 · CI chạy test với Postgres và Redis thật |
+| **Should** | Xác thực email · Quên / đặt lại mật khẩu · Xem và đăng xuất các thiết bị khác · Đổi mật khẩu, xóa tài khoản | Hàng đợi email bằng bảng outbox + tiến trình worker · Đo tải bằng k6 · CI chạy test với Postgres và Redis thật |
 | **Could** | Gắn góp ý với tài khoản · Lịch sử đăng nhập cho quản trị | **Kubernetes chạy trên máy (k3d)** · **Kafka cho luồng sự kiện thống kê** · Đo đạc bằng Prometheus |
 | **Won't** (giai đoạn này) | Xác thực hai lớp (2FA), đăng nhập không mật khẩu (passkey) · Nhiều vai trò chi tiết · Tách microservice | Kubernetes trên cloud thật · Kafka trên môi trường production |
 
@@ -130,7 +130,7 @@ Cách này có ba ưu điểm:
 | Giai đoạn | Tuần | Nội dung | Ra sản phẩm thật? |
 |---|---|---|---|
 | **A – Nền móng** | 6–8 | Postgres, Redis, Docker compose, tài khoản (Must), deploy | Có |
-| **B – Hoàn thiện** | 9–10 | Xác thực email, quên mật khẩu, Google, quản lý thiết bị, outbox + worker, đo tải, CI | Có |
+| **B – Hoàn thiện** | 9–10 | Xác thực email, quên mật khẩu, quản lý thiết bị, outbox + worker, đo tải, CI | Có |
 | **C – Mở rộng để học** | 11 | Kubernetes trên máy (k3d), Kafka cho luồng thống kê | Không – để học và viết báo cáo |
 
 Giai đoạn C chỉ bắt đầu khi A và B đã xong. Nếu đến tuần 10 mà B chưa xong, **cắt C**, không cắt phần bảo mật của A và B.
@@ -153,7 +153,7 @@ Giai đoạn C chỉ bắt đầu khi A và B đã xong. Nếu đến tuần 10 
 | Header bảo mật | `helmet` | Bật sẵn các header an toàn | – |
 | Ghi log | **pino** + `pino-http` | Log dạng JSON, nhanh, có che sẵn dữ liệu nhạy cảm | `console.log`: không lọc được, không có mã request |
 | Gửi email | **nodemailer**; dev dùng **Mailpit** (hộp thư giả chạy trong Docker) | Dev không gửi email thật; production chỉ cần đổi `SMTP_URL` | Gọi trực tiếp API của nhà cung cấp email: gắn chặt vào một nhà cung cấp |
-| Đăng nhập Google | Nút **Google Identity Services** ở frontend + **`google-auth-library`** để kiểm tra ID token ở backend | Không phải tự làm luồng chuyển hướng OAuth; ít chỗ dễ sai | `openid-client`: đầy đủ hơn, phức tạp hơn; dùng khi có thêm nhà cung cấp khác |
+| Đăng nhập Google (sau giai đoạn này) | Chỉ chọn thư viện khi có quyết định triển khai và OAuth Client ID | Tránh thêm việc khi một người đang phụ trách cả BE1 và BE2 | Google Identity Services + `google-auth-library` là phương án để đánh giá sau |
 | Đo tải | **k6** | Kịch bản viết bằng JavaScript, cho số liệu p95/p99 đưa thẳng vào báo cáo | Apache JMeter: nặng, dùng giao diện |
 | Container | **Docker** + **docker compose** | Mục 3 | – |
 | Điều phối (giai đoạn C) | **k3d** (k3s chạy trong Docker) + Traefik có sẵn | Nhẹ, một lệnh là có cụm; Traefik hỗ trợ cả Ingress lẫn Gateway API | minikube, kind: đều được. **Không dùng ingress-nginx**: dự án đã ngừng hỗ trợ từ 3/2026 |
@@ -301,7 +301,8 @@ B1Web/
     │   │   ├── auth/                routes · service · repository · schemas
     │   │   ├── users/               hồ sơ, đổi mật khẩu, xóa tài khoản
     │   │   ├── outbox/              enqueue() + bộ xử lý từng loại việc
-    │   │   ├── campus/ buildings/ pois/ feedback/ stats/ areas/ rooms/   (đã có)
+    │   │   ├── campus/ buildings/ pois/ feedback/ stats/   (đã có)
+    │   │   ├── areas/ rooms/         (theo kế hoạch tải khối, chưa có trong repo)
     │   │   └── telemetry/           (giai đoạn C) producer/consumer Kafka
     │   └── db/seed.js               nạp nội dung từ JSON (đường dẫn qua biến CONTENT_DIR)
     ├── scripts/
@@ -330,7 +331,7 @@ B1Web/
 CREATE TABLE users (
   id                uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   email             text NOT NULL,
-  password_hash     text,                       -- NULL nếu chỉ đăng nhập bằng Google
+  password_hash     text,                       -- NULL dành cho tài khoản OAuth nếu bổ sung về sau
   display_name      text,
   role              text NOT NULL DEFAULT 'user' CHECK (role IN ('user', 'admin')),
   email_verified_at timestamptz,
@@ -388,7 +389,9 @@ CREATE INDEX outbox_pending_idx ON outbox (run_after) WHERE done_at IS NULL;
 ALTER TABLE feedback ADD COLUMN user_id uuid REFERENCES users(id) ON DELETE SET NULL;
 ```
 
-Các bảng nội dung (`buildings`, `pois`, `feedback`, `visits`, `areas`, `floors`, `rooms`, `area_links`) chuyển nguyên từ `schema.sql` sang `0001_init.sql`, chỉ đổi kiểu dữ liệu cho hợp Postgres:
+Các bảng nội dung hiện có (`buildings`, `pois`, `feedback`, `visits`) đã chuyển từ `schema.sql`
+sang `0001_init.sql`, đổi kiểu dữ liệu cho hợp Postgres. Các bảng của kế hoạch tải khối
+(`areas`, `floors`, `rooms`, `area_links`) chưa có trong repo; khi làm sẽ thêm migration mới:
 
 | SQLite | PostgreSQL |
 |---|---|
@@ -430,7 +433,7 @@ Gốc vẫn là `/api`. Định dạng lỗi **giữ tương thích** với fron
 | POST | `/auth/verify-email/resend` 🔐 | Gửi lại email xác thực | `202` | `429` | Should |
 | POST | `/auth/password/forgot` | `{ email }`: **luôn** trả 202 dù email có tồn tại hay không | `202` | `429` | Should |
 | POST | `/auth/password/reset` | `{ token, password }` → đổi mật khẩu, **xóa mọi session** của user | `204` | `400 TOKEN_INVALID` | Should |
-| POST | `/auth/google` | `{ credential }` (ID token từ nút Google) | `200 { user }` + cookie | `401 GOOGLE_TOKEN_INVALID` | Should |
+| POST | `/auth/google` | Chưa triển khai trong giai đoạn này; xem mục 22 nếu mở rộng | – | – | Sau giai đoạn này |
 | GET | `/auth/sessions` 🔐 | Các thiết bị đang đăng nhập | `200 [ … ]` | – | Should |
 | DELETE | `/auth/sessions/:id` 🔐 | Đăng xuất một thiết bị | `204` | `404` | Should |
 | DELETE | `/auth/sessions` 🔐 | Đăng xuất mọi thiết bị khác | `204` | – | Should |
@@ -445,14 +448,14 @@ Gốc vẫn là `/api`. Định dạng lỗi **giữ tương thích** với fron
 { "id": "6f1c…", "email": "sv@gmail.com", "displayName": "Châu", "role": "user", "emailVerified": false }
 ```
 
-### 8.2 Hai lựa chọn có đánh đổi, cần nhóm chốt
+### 8.2 Lựa chọn về email cho giai đoạn này
 
-**(1) Có nên báo "email đã được dùng" khi đăng ký?**
+**(1) Báo "email đã được dùng" khi đăng ký: chọn `409 EMAIL_TAKEN` cho giai đoạn A/B.**
 
-- *Giai đoạn A (đề xuất):* trả `409 EMAIL_TAKEN`. Hầu hết website thực tế đều làm vậy, và đây là cách dễ dùng nhất cho người dùng. Đổi lại, kẻ xấu biết được email nào đã có tài khoản. Rủi ro đó được giảm bằng rate limit chặt cho `/auth/register`.
+- *Giai đoạn A/B (đã chọn):* trả `409 EMAIL_TAKEN`. Hầu hết website thực tế đều làm vậy, và đây là cách dễ dùng nhất cho người dùng. Đổi lại, kẻ xấu biết được email nào đã có tài khoản. Rủi ro đó được giảm bằng rate limit chặt cho `/auth/register`.
 - *Khi đã có email (giai đoạn B), nếu muốn chặt hơn:* luôn trả `202 "Kiểm tra hộp thư"`. Email trùng thì gửi thư "có người vừa thử đăng ký bằng email của bạn". Không lộ thông tin, nhưng người dùng phải vào hộp thư mới biết kết quả.
 
-**(2) Có bắt xác thực email trước khi đăng nhập không?** Đề xuất: **không chặn đăng nhập**, chỉ hiện nhắc nhở. Chỉ bắt buộc xác thực với những việc nhạy cảm (gửi góp ý, quyền admin). Nhờ vậy dịch vụ email có trục trặc cũng không làm người dùng bị khóa ngoài.
+**(2) Không bắt xác thực email trước khi đăng nhập.** Khi luồng xác thực email giai đoạn B hoạt động, chỉ hiện nhắc nhở; các thao tác nhạy cảm như quyền admin sẽ yêu cầu email đã xác thực. Góp ý vẫn cho gửi khi chưa xác thực, theo API hiện tại. Nhờ vậy dịch vụ email có trục trặc cũng không làm người dùng bị khóa ngoài.
 
 Ở trang đăng nhập, lỗi **luôn** là một câu chung chung: "Email hoặc mật khẩu không đúng". Không có ngoại lệ.
 
@@ -816,7 +819,7 @@ APP_ORIGINS=http://localhost:5173                                # các Origin �
 APP_URL=http://localhost:5173                                    # dùng để tạo link trong email
 SMTP_URL=smtp://localhost:1025
 MAIL_FROM="B1Web <no-reply@example.test>"
-GOOGLE_CLIENT_ID=                                                # để trống = tắt đăng nhập Google
+# GOOGLE_CLIENT_ID chỉ thêm khi quyết định làm đăng nhập Google sau giai đoạn này.
 RUN_MIGRATIONS=true
 CONTENT_DIR=../web/public/data
 LOG_LEVEL=info
@@ -1044,7 +1047,7 @@ Phần này do người làm frontend phụ trách, phối hợp với backend.
 
 - **Tuần 7:** backend chấp nhận **cả hai** cách, token cũ hoặc session admin.
 - **Tuần 8:** trang quản trị đã chuyển xong → xóa `ADMIN_TOKEN` khỏi code và khỏi biến môi trường.
-- Tạo admin đầu tiên bằng `npm run make-admin -- email@...`. Không có API nào tự nâng quyền.
+- BE1 (người làm chức năng admin) giữ quyền tạo admin đầu tiên bằng `npm run make-admin -- email@...`. Không có API nào tự nâng quyền.
 
 ---
 
@@ -1068,25 +1071,24 @@ Phần này dựa trên cách chia BE1/BE2 trong kế hoạch của Nam, để k
 | Đăng ký / đăng nhập / session / phân quyền (Must) | 5–6 |
 | Rate limit + các mục bảo mật | 2 |
 | Outbox + worker + xác thực email + quên mật khẩu | 4 |
-| Đăng nhập Google | 2–3 |
 | Quản lý thiết bị, đổi mật khẩu, xóa tài khoản | 2 |
 | Deploy backend + Postgres + Redis + `vercel.json` | 2 |
 | CI | 1 |
 | k6 + báo cáo số liệu | 2 |
-| **Tổng Must + Should** | **khoảng 25–28** |
+| **Tổng Must + Should** | **khoảng 22–24** |
 | Kubernetes trên k3d | 4–5 |
 | Kafka luồng thống kê | 4–5 |
 
-Hai người backend có khoảng 6 tuần, nhưng **đồng thời** còn kế hoạch tải khối của Nam (manifest, areas, rooms, đến 6/12). Tổng khối lượng vượt sức hai người nếu làm hết.
+Người làm nhánh `dtm` kiêm cả BE1 và BE2, đồng thời còn kế hoạch tải khối của Nam (manifest, areas, rooms, đến 6/12). Khối lượng này phải ưu tiên Must và cắt giai đoạn C trước nếu thiếu thời gian.
 
-Đề xuất thứ tự ưu tiên khi thiếu thời gian:
+Thứ tự ưu tiên đã chọn cho nhánh `dtm` khi thiếu thời gian:
 
 1. Mốc 6/12 của kế hoạch tải khối.
 2. Must của tài khoản.
 3. Should của tài khoản.
 4. Giai đoạn C.
 
-Nhóm cần chốt thứ tự này ở mục 24.
+Người phụ trách `dtm` làm cả BE1 và BE2; không đánh đổi mốc tải khối hoặc bảo mật Must để thêm việc giai đoạn C.
 
 ---
 
@@ -1096,14 +1098,27 @@ Tuần 1 = 12/10/2026, khớp với kế hoạch của Nam.
 
 ### Tuần 6 (16–22/11) – Chốt và dựng nền
 
-- [ ] Cả nhóm: chốt các quyết định ở mục 24; viết ADR 004, 005, 006.
-- [ ] BE2: `compose.yaml` (postgres, redis, mailpit); mọi thành viên chạy được `docker compose up -d` trên máy mình.
-- [ ] BE1: `infra/db.js`, `infra/migrate.js`, `0001_init.sql` (chuyển bảng cũ); sửa `seed.js` và các service cũ sang `pg` (dạng async); **6 test cũ pass trên Postgres**.
-- [ ] BE1 + TV4: phần `/auth` trong `docs/API.md`.
+- [x] Người phụ trách `dtm`: chốt quyết định ở mục 24; ADR 004, 005, 006 đã được ghi trong `docs/decisions/`.
+- [ ] Cả nhóm: duyệt các quyết định này theo quy trình PR.
+- [x] BE2: `compose.yaml` (Postgres, Redis, Mailpit) chạy healthy trên máy local của người phụ trách `dtm`.
+- [ ] Cả nhóm: xác nhận mỗi thành viên chạy được `docker compose up -d` trên máy mình.
+- [x] BE1: `infra/db.js`, `infra/migrate.js`, `0001_init.sql` (chuyển bảng cũ); sửa `seed.js` và các service cũ sang `pg` (dạng async); **6 test cũ pass trên Postgres**.
+- [x] BE1: ghi hợp đồng `/auth` trong `docs/API.md` theo quyết định tuần 6.
+- [ ] TV4: xem và xác nhận hợp đồng `/auth` để frontend triển khai đúng.
 
 Mốc: dự án chạy trên Postgres; API cũ không đổi hình dạng (frontend không phải sửa gì).
 
+**Trạng thái nhánh `dtm` ngày 18/11/2026:** phần BE1 ở trên đã có trong patch giai đoạn A;
+test hiện tại gồm 7 bài kiểm tra API nội dung và 23 bài khác, tổng cộng 30/30 pass trên Postgres/Redis local.
+`docker compose up -d --wait` đưa Postgres, Redis, Mailpit vào trạng thái healthy; `/readyz`,
+`/api/campus`, `/api/buildings/b1` trả 200. ADR 004–006 và hợp đồng `/auth` đã có trong repo.
+Chưa xác nhận mọi thành viên chạy Compose được, nhóm đã duyệt ADR/ưu tiên và TV4 đã thống nhất
+hợp đồng `/auth`; các mục cần phối hợp đó vẫn để mở ở checklist.
+
 Mốc 22/11 của kế hoạch tải khối vẫn giữ. Phần `areas`/`rooms` viết thẳng trên Postgres, nhờ vậy không phải chuyển đổi hai lần.
+Kế hoạch tải khối chi tiết của Nam chưa có trong workspace này; hiện chưa có module `areas`, `rooms`
+hoặc script `manifest`. Đây là mốc riêng còn cần đặc tả để triển khai, không thuộc phần nền PostgreSQL
+đã kiểm chứng ở trên.
 
 ### Tuần 7 (23–29/11) – Tài khoản (Must)
 
@@ -1128,7 +1143,7 @@ Mốc: trên link Vercel, đăng ký → đóng trình duyệt → mở lại v�
 
 ### Tuần 10 (14–20/12) – Giai đoạn B, phần 2
 
-- [ ] BE1: đăng nhập Google; danh sách thiết bị và đăng xuất từ xa; xóa tài khoản.
+- [ ] BE1: danh sách thiết bị và đăng xuất từ xa; xóa tài khoản. Đăng nhập Google để sau giai đoạn này.
 - [ ] BE2: k6 với 1 và 2 bản sao; bảng số liệu cho báo cáo; dọn dữ liệu định kỳ.
 - [ ] Cả nhóm: rà lại danh sách bảo mật ở mục 10.1, từng dòng một, có người thứ hai kiểm tra chéo.
 
@@ -1181,6 +1196,7 @@ Giữ nguyên `docs/CONVENTIONS.md` (nhánh, PR, review) và bổ sung các quy 
 
 | Khi xuất hiện nhu cầu | Thì làm |
 |---|---|
+| Cần đăng nhập bằng Google sau giai đoạn này | Tạo OAuth Client ID cho tên miền triển khai; đánh giá Google Identity Services + `google-auth-library`, rồi mới thêm API và giao diện |
 | Có app di động hoặc dịch vụ khác cần xác thực | Thêm OAuth 2.0 / OpenID Connect, hoặc token truy cập ngắn hạn cho API; website vẫn dùng session |
 | Cần an toàn hơn cho admin | 2FA bằng TOTP, rồi passkey (WebAuthn) |
 | Nhiều vai trò (giảng viên, quản lý từng tòa) | Bảng `roles` + `user_roles` + quyền theo tài nguyên, thay cột `role` |
@@ -1210,11 +1226,13 @@ Giữ nguyên `docs/CONVENTIONS.md` (nhánh, PR, review) và bổ sung các quy 
 
 ## 24. Việc cần chốt ngay tuần này
 
-- [ ] **Thứ tự ưu tiên** giữa kế hoạch tải khối và kế hoạch này (mục 18).
-- [ ] **ADR 004 – Postgres thay SQLite.** Thay `docs/decisions/002`; ghi rõ vì sao bỏ câu "không thêm thư viện mới" trong kế hoạch tải khối.
-- [ ] **ADR 005 – Session trên Redis, không dùng JWT** (mục 9.1).
-- [ ] **ADR 006 – Phạm vi Docker / Kubernetes / Kafka** (mục 3): Docker dùng thật; Kubernetes và Kafka chỉ để học ở giai đoạn C.
-- [ ] Hai lựa chọn ở mục 8.2: báo email trùng khi đăng ký? Có bắt xác thực email trước khi đăng nhập không?
-- [ ] Có làm đăng nhập Google không: cần tạo *OAuth Client ID* trên Google Cloud Console, khai báo tên miền Vercel.
-- [ ] Ai giữ quyền tạo tài khoản admin đầu tiên.
-- [ ] Cập nhật `docs/PLAN.md` mục 2 (phạm vi) và mục 7 (phân vai) sau khi chốt.
+- [x] **Thứ tự ưu tiên** giữa kế hoạch tải khối và kế hoạch này (mục 18): mốc tải khối → Must → Should → giai đoạn C.
+- [x] **ADR 004 – Postgres thay SQLite.** Thay `docs/decisions/002`; ghi rõ vì sao bỏ câu "không thêm thư viện mới" trong kế hoạch tải khối.
+- [x] **ADR 005 – Session trên Redis, không dùng JWT** (mục 9.1).
+- [x] **ADR 006 – Phạm vi Docker / Kubernetes / Kafka** (mục 3): Docker dùng thật; Kubernetes và Kafka chỉ để học ở giai đoạn C.
+- [x] Hai lựa chọn ở mục 8.2: đăng ký trùng email trả `409 EMAIL_TAKEN`; không chặn đăng nhập khi email chưa xác thực.
+- [x] Đăng nhập Google: không làm trong giai đoạn này; chỉ cân nhắc sau khi hoàn tất Must và Should, không cần tạo OAuth Client ID bây giờ.
+- [x] BE1 (người làm chức năng admin) giữ quyền tạo tài khoản admin đầu tiên bằng script `make-admin`.
+- [x] Cập nhật `docs/PLAN.md` mục 2 (phạm vi) và mục 7 (phân vai) theo quyết định trên.
+
+Các quyết định ở mục này được chốt cho nhánh `dtm` ngày 18/11/2026. Người dùng đã xác nhận dùng Redis cho session.

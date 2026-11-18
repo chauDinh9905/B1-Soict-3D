@@ -30,6 +30,6 @@ export function authRoutes({ redis, limiters }) {
     res.json({ user: auth.toPublicUser(req.user) });
   });
 
-  // TODO giai đoạn B (tuần 9–10): verify-email, password/forgot, password/reset, google, sessions – xem BACKEND_PLAN mục 8.1
+  // TODO giai đoạn B (tuần 9–10): verify-email, password/forgot, password/reset, sessions – xem BACKEND_PLAN mục 8.1. Google để sau giai đoạn này.
   return r;
 }

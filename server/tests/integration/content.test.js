@@ -15,9 +15,10 @@ test('healthz và readyz', async () => {
   assert.equal((await b.req('GET', '/readyz')).status, 200);
 });
 
-test('campus liệt kê b1', async () => {
+test('GET /campus giống hệt file tĩnh web/public/data/campus.json', async () => {
   const { data } = await browser(env.base).req('GET', '/api/campus');
-  assert.deepEqual(data.buildings, ['b1']);
+  const expected = JSON.parse(await readFile(new URL('../../../web/public/data/campus.json', import.meta.url), 'utf8'));
+  assert.deepEqual(data, expected);
 });
 
 test('GET /buildings/b1 giống hệt file tĩnh web/public/data/buildings/b1.json', async () => {
