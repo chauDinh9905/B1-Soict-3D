@@ -1,6 +1,14 @@
 import * as THREE from 'three';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 
-export function createLighting(scene) {
+export function createLighting(scene, renderer) {
+  if (renderer) {
+    // Môi trường phản chiếu dựng sẵn (không cần file HDRI): sàn bóng, inox, kính trong nhà có ánh phản chiếu
+    const pmrem = new THREE.PMREMGenerator(renderer);
+    scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+    scene.environmentIntensity = 0.5;
+    pmrem.dispose();
+  }
   scene.background = new THREE.Color(0xa9c4e8);
   scene.fog = new THREE.Fog(0xa9c4e8, 300, 1500);
   const hemi = new THREE.HemisphereLight(0xdfeaff, 0x8a8478, 1.2);

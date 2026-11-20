@@ -4,8 +4,11 @@ import math
 import bpy
 from mathutils import Vector
 
+from . import layout
 
-def setup_scene(coll, arc=None):
+OSM_ARM_LEN = 49.3   # front length of one arm in the OSM footprint the camera spots were first tuned on
+
+def setup_scene(coll, arc=None, cameras=True):
     scene = bpy.context.scene
     world = scene.world or bpy.data.worlds.new('World')
     scene.world = world
@@ -49,9 +52,16 @@ def setup_scene(coll, arc=None):
         coll.objects.link(ob)
         return ob
 
-    ref_cam = cam('Cam_Ref', (-36.0, 62.0, 1.6), (-4.0, -4.0, 19.0), 20)
-    cam('Cam_Aerial', (95.0, 85.0, 75.0), (-5.0, -5.0, 10.0), 35)
-    if arc:
+    def spot(x, y, z):
+        """A spot tuned on the OSM footprint, pushed out from the V corner as far as the arms grew."""
+        p = layout.CORNER + (Vector((x, y)) - layout.CORNER) * k
+        return (p.x, p.y, z)
+
+    k = layout.ARM_LEN / OSM_ARM_LEN
+    ref_cam = cam('Cam_Ref', spot(-36.0, 62.0, 1.6), spot(-4.0, -4.0, 19.0 * k), 20) if cameras else None
+    if cameras:
+        cam('Cam_Aerial', spot(95.0, 85.0, 75.0 * k), spot(-5.0, -5.0, 10.0), 35)
+    if arc and cameras:
         P, N = arc['P'], arc['N']
         cm, nm = P[len(P) // 2], N[len(N) // 2]
         eye = cm + nm * 30.0
@@ -59,7 +69,8 @@ def setup_scene(coll, arc=None):
         c0, u, n = arc['entry']
         eye = c0 + n * 9.0 - u * 6.0
         cam('Cam_Porch', (eye.x, eye.y, 1.6), (c0.x + u.x * 1.0, c0.y + u.y * 1.0, 2.6), 20)
-    scene.camera = ref_cam
+    if ref_cam:
+        scene.camera = ref_cam
     for eng in ('BLENDER_EEVEE', 'BLENDER_EEVEE_NEXT'):
         try:
             scene.render.engine = eng

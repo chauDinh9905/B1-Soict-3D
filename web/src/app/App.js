@@ -8,6 +8,7 @@ import { LoadingFeature } from '../features/loading/LoadingFeature.js';
 import { NavigationFeature } from '../features/navigation/NavigationFeature.js';
 import { HotspotFeature } from '../features/hotspots/HotspotFeature.js';
 import { InfoPanelFeature } from '../features/info-panel/InfoPanelFeature.js';
+import { ViewerFeature } from '../features/viewer/ViewerFeature.js';
 import { TourFeature } from '../features/tour/TourFeature.js';
 import { MinimapFeature } from '../features/minimap/MinimapFeature.js';
 import { FeedbackFeature } from '../features/feedback/FeedbackFeature.js';
@@ -20,6 +21,7 @@ import { setupDebug } from '../shared/debug.js';
 const FEATURES = [
   LoadingFeature,
   NavigationFeature,
+  ViewerFeature,
   HotspotFeature,
   InfoPanelFeature,
   TourFeature,
@@ -33,7 +35,7 @@ export class App {
     this.engine = new Engine(viewport, CONFIG.CAMERA);
     this.assets = new AssetLoader(this.bus);
     this.api = new ApiClient(CONFIG);
-    this.world = new World(this.engine.scene, this.assets, this.api, this.bus);
+    this.world = new World(this.engine.scene, this.assets, this.api, this.bus, this.engine.renderer);
     // ctx là "túi đồ nghề" truyền cho mọi feature
     this.ctx = { config: CONFIG, bus: this.bus, engine: this.engine, assets: this.assets, api: this.api, world: this.world, uiRoot };
     this.features = FEATURES.map((F) => new F());

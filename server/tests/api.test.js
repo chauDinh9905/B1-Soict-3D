@@ -31,6 +31,14 @@ test('building b1 có đúng hình dạng frontend cần', async () => {
   assert.ok(Array.isArray(b.pois));
 });
 
+test('building b1 liệt kê phòng dựng riêng (sảnh)', async () => {
+  const b = await (await fetch(`${base}/buildings/b1`)).json();
+  assert.ok(Array.isArray(b.interiors));
+  assert.equal(b.interiors[0].id, 'sanh');
+  assert.match(b.interiors[0].model, /\.glb$/);
+  assert.match(b.interiors[0].entry, /^Cam_/);
+});
+
 test('tòa nhà không tồn tại -> 404', async () => {
   assert.equal((await fetch(`${base}/buildings/zz`)).status, 404);
 });

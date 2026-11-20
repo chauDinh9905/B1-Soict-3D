@@ -5,7 +5,8 @@ import os
 import bpy
 from mathutils import Vector
 
-from .config import BAND_D, PENTHOUSE_EDGES
+from .config import BAND_D
+from .layout import PENTHOUSE_EDGES
 from .materials import MAT
 from .meshkit import MB, collection, cylinder, prism, quad_along
 

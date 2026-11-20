@@ -6,18 +6,37 @@ MAT = {}
 GLASS_POOL = ['B1_Glass'] * 12 + ['B1_GlassCurtain'] * 4 + ['B1_GlassBlind'] * 2 + ['B1_GlassDark'] * 2
 
 
-def principled(name, color, rough=0.5, metal=0.0, coat=0.0, emission=None):
+def principled(name, color, rough=0.5, metal=0.0, coat=0.0, emission=None, alpha=1.0):
     m = bpy.data.materials.get(name) or bpy.data.materials.new(name)
     m.use_nodes = True
     bsdf = m.node_tree.nodes.get('Principled BSDF')
-    vals = {'Base Color': (*color, 1.0), 'Roughness': rough, 'Metallic': metal, 'Coat Weight': coat}
+    vals = {'Base Color': (*color, 1.0), 'Roughness': rough, 'Metallic': metal, 'Coat Weight': coat,
+            'Alpha': alpha}
     if emission is not None:
         vals.update({'Emission Color': (*emission[0], 1.0), 'Emission Strength': emission[1]})
     for k, v in vals.items():
         if k in bsdf.inputs:
             bsdf.inputs[k].default_value = v
-    m.diffuse_color = (*color, 1.0)
+    if alpha < 1.0:   # kính nhìn xuyên: glTF xuất alphaMode BLEND
+        for attr, val in (('surface_render_method', 'BLENDED'), ('blend_method', 'BLEND')):
+            if hasattr(m, attr):
+                try:
+                    setattr(m, attr, val)
+                except (TypeError, AttributeError):
+                    pass
+    m.diffuse_color = (*color, alpha)
     MAT[name] = m
+    return m
+
+
+def image_material(name, image_path, rough=0.3, coat=0.0):
+    """Vật liệu dùng ảnh làm Base Color (mesh cần UV, xem meshkit.box_uv)."""
+    m = principled(name, (0.9, 0.9, 0.9), rough, coat=coat)
+    nt = m.node_tree
+    tex = next((n for n in nt.nodes if n.bl_idname == 'ShaderNodeTexImage'), None) or nt.nodes.new('ShaderNodeTexImage')
+    img = bpy.data.images.load(image_path, check_existing=True)
+    tex.image = img
+    nt.links.new(tex.outputs['Color'], nt.nodes['Principled BSDF'].inputs['Base Color'])
     return m
 
 
@@ -57,7 +76,7 @@ def make_materials():
     principled('B1_GlassBlind', (0.40, 0.42, 0.43), 0.6, 0.0, coat=1.0)
     principled('B1_GlassDark', (0.008, 0.009, 0.01), 0.1)
     principled('B1_GlassCluster', (0.07, 0.10, 0.13), 0.05, 0.0)  # one glass for all clustered windows
-    principled('B1_GlassLobby', (0.05, 0.065, 0.075), 0.03, 0.0)  # clear storefront glass, slightly lighter
+    principled('B1_GlassLobby', (0.05, 0.065, 0.075), 0.03, 0.0, alpha=0.3)  # kính sảnh: nhìn xuyên được
     principled('B1_Roof', (0.38, 0.37, 0.35), 0.9)
     add_grime('B1_Roof', 0.3, 0.3)
     principled('B1_Canopy', (0.06, 0.065, 0.07), 0.5, 0.2)        # porte-cochere fascia + soffit
@@ -65,6 +84,7 @@ def make_materials():
     principled('B1_Downlight', (1.0, 0.97, 0.9), 0.3, emission=((1.0, 0.95, 0.85), 6.0))
     principled('B1_Stone', (0.05, 0.05, 0.055), 0.3)              # dark granite steps
     principled('B1_SignBlue', (0.03, 0.20, 0.62), 0.3)
+    principled('B1_SignRed', (0.70, 0.06, 0.06), 0.3)
     principled('B1_Metal', (0.55, 0.56, 0.58), 0.35, 1.0)
     principled('B1_Steel', (0.62, 0.63, 0.65), 0.22, 1.0)
     principled('Ctx_Asphalt', (0.07, 0.07, 0.075), 0.9)

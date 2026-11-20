@@ -11,6 +11,27 @@ export class Building {
     this.colliders = [];   // mesh COL_* – dùng cho đi bộ
     this.cameras = {};     // Cam_* từ Blender – dùng cho tour
     this.poiAnchors = {};  // POI_* từ Blender
+    this.interiors = {};   // id -> { def, root }: phòng dựng thành model riêng (data.interiors)
+  }
+
+  /**
+   * Nạp một phòng (glb riêng). Phòng xuất từ Blender cùng hệ toạ độ với vỏ ngoài,
+   * nên chỉ cần gắn vào this.root như glb tòa nhà.
+   */
+  async loadInterior(assets, def) {
+    if (this.interiors[def.id]) return this.interiors[def.id];
+    const gltf = await assets.loadGLTF(def.model);
+    const root = gltf.scene;
+    root.name = `Interior_${def.id}`;
+    root.traverse((o) => {
+      if (o.isMesh) { o.castShadow = false; o.receiveShadow = true; }
+      if (o.name.startsWith('COL_')) { o.visible = false; this.colliders.push(o); }
+      if (o.name.startsWith('POI_')) this.poiAnchors[o.name] = o;
+    });
+    gltf.cameras.forEach((c) => { this.cameras[c.name] = c; });
+    this.root.add(root);
+    this.interiors[def.id] = { def, root };
+    return this.interiors[def.id];
   }
 
   async load(assets) {

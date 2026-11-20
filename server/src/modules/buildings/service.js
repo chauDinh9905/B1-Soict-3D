@@ -13,5 +13,6 @@ export function getBuilding(db, id) {
     description: b.description,
     pois: pois.map((p) => ({ id: p.id, title: p.title, position: [p.x, p.y, p.z], text: p.text, image: p.image })),
     views: JSON.parse(b.views ?? '[]'),
+    interiors: JSON.parse(b.interiors ?? '[]'),
   };
 }

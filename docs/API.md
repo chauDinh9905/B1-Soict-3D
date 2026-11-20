@@ -33,7 +33,15 @@ Hình dạng `GET /campus` và `GET /buildings/:id` phải **giống hệt** fil
   "pois": [
     { "id": "b1-sanh", "title": "Sảnh chính B1", "position": [0, 2, -25], "text": "…", "image": null }
   ],
-  "views": ["Cam_Ref", "Cam_Aerial", "Cam_Lobby", "Cam_Porch"]
+  "views": ["Cam_Ref", "Cam_Aerial", "Cam_Lobby", "Cam_Porch"],
+  "interiors": [
+    { "id": "sanh", "name": "Sảnh B1", "model": "models/buildings/b1/b1_sanh.glb", "entry": "Cam_SanhEntry" },
+    { "id": "giangduong", "name": "Giảng đường B1", "model": "models/buildings/b1/b1_giangduong.glb", "entry": "Cam_AudRear" }
+  ]
 }
 ```
 `position` là tọa độ Three.js **cục bộ của tòa nhà** (mét; x = đông, y = lên, z = nam).
+
+`interiors`: các phòng dựng thành model riêng (file Blender riêng, xuất `.glb` riêng). Model phòng dùng **cùng hệ
+tọa độ** với `model` của tòa nhà nên web gắn thẳng vào tòa nhà, không cần dịch. `entry` là tên camera `Cam_*`
+trong glb phòng, nơi người xem được đưa tới khi bấm "Vào …". Không có phòng nào thì là `[]`.

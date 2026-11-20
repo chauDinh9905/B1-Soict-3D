@@ -9,6 +9,7 @@ CREATE TABLE IF NOT EXISTS buildings (
   rotation_deg REAL NOT NULL DEFAULT 0,
   placeholder  TEXT,                      -- JSON [w,h,d]
   views        TEXT,                      -- JSON ["Cam_Ref", ...]
+  interiors    TEXT,                      -- JSON [{ id, name, model, entry }] – phòng là model riêng
   enabled      INTEGER NOT NULL DEFAULT 1,
   sort_order   INTEGER NOT NULL DEFAULT 0
 );

@@ -1,9 +1,13 @@
 """Xuất một tòa nhà ra .glb cho web.
 
-    blender -b blender/buildings/b1/B1.blend -P blender/tools/export_glb.py -- B1_Building web/public/models/buildings/b1/b1.glb
+    blender -b blender/buildings/b1/B1.blend -P blender/tools/export_glb.py -- B1_Building web/public/models/buildings/b1/b1.glb exclude=B1_Auditorium
+    blender -b blender/buildings/b1/B1.blend -P blender/tools/export_glb.py -- B1_Auditorium web/public/models/buildings/b1/b1_giangduong.glb noextra
 
 Xuất mọi object hiển thị trong collection chỉ định (gồm collection con), kèm camera Cam_*,
-empty POI_* và mesh va chạm COL_*.
+empty POI_* và mesh va chạm COL_* của cả file.
+Tùy chọn sau đường dẫn .glb (không bắt buộc):
+  exclude=TEN_COLLECTION  bỏ collection con đó (và camera trong nó) khỏi file – dùng khi nó là model riêng
+  noextra                 chỉ lấy object nằm trong collection chỉ định, không kéo Cam_/POI_/COL_ của cả file
 LƯU Ý: chưa chạy thử trên máy nhóm – mở kết quả bằng https://gltf-viewer.donmccurdy.com để kiểm tra.
 - Node Noise (grime) trong materials.py KHÔNG sang được glTF: web chỉ nhận Base Color / Roughness /
   Metallic / Emission / Clearcoat. Muốn giữ vết bẩn thì bake ra texture (việc giai đoạn sau).
@@ -17,6 +21,9 @@ args = sys.argv[sys.argv.index('--') + 1:] if '--' in sys.argv else []
 COLL = args[0] if len(args) > 0 else 'B1_Building'
 OUT = os.path.abspath(args[1] if len(args) > 1 else 'b1.glb')
 EXTRA_PREFIX = ('Cam_', 'POI_', 'COL_')
+OPTS = args[2:]
+EXCLUDE = [a.split('=', 1)[1] for a in OPTS if a.startswith('exclude=')]
+NO_EXTRA = 'noextra' in OPTS
 
 coll = bpy.data.collections.get(COLL)
 if coll is None:
@@ -24,8 +31,16 @@ if coll is None:
 
 for o in bpy.context.selected_objects:
     o.select_set(False)
-picked = [o for o in coll.all_objects if not o.hide_render]
-picked += [o for o in bpy.data.objects if o.name.startswith(EXTRA_PREFIX) and o not in picked]
+skip = set()
+for name in EXCLUDE:
+    ex = bpy.data.collections.get(name)
+    if ex is None:
+        raise SystemExit(f'Không thấy collection cần loại: {name}')
+    skip |= set(ex.all_objects)
+picked = [o for o in coll.all_objects if not o.hide_render and o not in skip]
+if not NO_EXTRA:
+    picked += [o for o in bpy.data.objects
+               if o.name.startswith(EXTRA_PREFIX) and o not in picked and o not in skip]
 for o in picked:
     o.hide_set(False)
     o.select_set(True)

@@ -4,13 +4,13 @@ import { Building } from './Building.js';
 
 /** Thế giới = ánh sáng + mặt đất + danh sách tòa nhà lấy từ API (hoặc JSON tĩnh dự phòng). */
 export class World {
-  constructor(scene, assets, api, bus) {
+  constructor(scene, assets, api, bus, renderer) {
     this.scene = scene;
     this.assets = assets;
     this.api = api;
     this.bus = bus;
     this.buildings = new Map();
-    this.lights = createLighting(scene);
+    this.lights = createLighting(scene, renderer);
     this.ground = createGround(scene);
   }
 
@@ -26,6 +26,12 @@ export class World {
     this.scene.add(b.root);
     this.buildings.set(id, b);
     this.bus.emit('building:loaded', b);
+    // Phòng dựng riêng (sảnh...): nạp ở nền, không bắt world:ready phải chờ
+    for (const def of data.interiors ?? []) {
+      b.loadInterior(this.assets, def)
+        .then(() => this.bus.emit('interior:loaded', { building: b, id: def.id, def }))
+        .catch((err) => console.warn(`[${id}] không nạp được phòng ${def.id}:`, err.message));
+    }
     return b;
   }
 

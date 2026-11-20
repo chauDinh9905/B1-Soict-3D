@@ -11,13 +11,13 @@ const read = (p) => JSON.parse(readFileSync(join(DATA, p), 'utf8'));
 
 export function seed(db) {
   db.exec('DELETE FROM pois; DELETE FROM buildings;');
-  const insB = db.prepare(`INSERT INTO buildings (id, name, description, model, lat, lon, rotation_deg, placeholder, views, sort_order)
-                           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`);
+  const insB = db.prepare(`INSERT INTO buildings (id, name, description, model, lat, lon, rotation_deg, placeholder, views, interiors, sort_order)
+                           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`);
   const insP = db.prepare('INSERT INTO pois (id, building_id, title, text, image, x, y, z) VALUES (?, ?, ?, ?, ?, ?, ?, ?)');
   read('campus.json').buildings.forEach((id, i) => {
     const b = read(`buildings/${id}.json`);
     insB.run(b.id, b.name, b.description ?? null, b.model, b.origin.lat, b.origin.lon, b.rotationDeg ?? 0,
-      JSON.stringify(b.placeholder?.size ?? null), JSON.stringify(b.views ?? []), i);
+      JSON.stringify(b.placeholder?.size ?? null), JSON.stringify(b.views ?? []), JSON.stringify(b.interiors ?? []), i);
     for (const p of b.pois ?? []) insP.run(p.id, b.id, p.title, p.text ?? null, p.image ?? null, ...p.position);
   });
 }

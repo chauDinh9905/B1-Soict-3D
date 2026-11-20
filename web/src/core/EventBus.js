@@ -3,8 +3,10 @@
  * Danh sách sự kiện đang dùng (cập nhật khi thêm):
  *   load:progress {loaded,total}   load:done
  *   world:ready  world            building:loaded  building
+ *   interior:loaded {building,id,def}   (phòng dựng riêng, vd. sảnh – nạp ở nền sau building:loaded)
  *   poi:click   poi              camera:flyTo {position,target}
- *   nav:mode    'orbit'|'walk'
+ *   nav:mode    'orbit'|'walk'     nav:modeChanged  'orbit'|'walk'  (đã đổi xong)
+ *   nav:noclip  boolean            walk:state {active}
  *   api:offline                    (backend không phản hồi, đang dùng dữ liệu tĩnh)
  */
 export class EventBus {

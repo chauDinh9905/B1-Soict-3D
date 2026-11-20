@@ -1,7 +1,8 @@
 """Assemble B1 from its modules into the B1_OSM collection tree."""
 import bpy
 
-from . import config
+from . import config, layout
+from .auditorium import build_auditorium
 from .config import B1_WAY
 from .context import build_context, build_ground
 from .lobby import build_lobby
@@ -11,7 +12,7 @@ from .osm import load_osm, make_projector
 from .rooftop import build_rooftop
 from .scene import setup_scene
 from .tower import build_tower
-from .wings import build_wings, load_parts
+from .wings import build_wings
 
 
 def reset_root(name='B1_OSM'):
@@ -47,11 +48,14 @@ def run(osm_path):
         ob.hide_render = True
 
     make_materials()
-    info = load_parts(osm, proj)
-    build_wings(info, collection(c_b1, 'B1_Wings'))
-    arc = build_lobby(osm, proj, c_b1)
+    info = layout.build_parts()          # parametric, symmetric footprint; OSM only planned it
+    build_wings(info, collection(c_b1, 'B1_Wings'), layout)
+    arc = build_lobby(c_b1)
     build_tower(arc, info, c_b1)
     build_rooftop(info, c_b1)
+
+    # the lobby interior is its own model: build_sanh.py -> B1_Sanh.blend -> b1_sanh.glb
+    build_auditorium(c_b1, info)
 
     build_ground(c_ctx)
     if config.BUILD_CONTEXT:

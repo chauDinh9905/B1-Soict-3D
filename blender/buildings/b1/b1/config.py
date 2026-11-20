@@ -9,21 +9,12 @@ PARAPET = 1.0
 BAND_D = 0.35       # projection of the horizontal spandrel bands
 PIL_D = 0.45        # projection of the vertical pilasters
 PIL_W = 0.5
-BAY_W = 6.6         # target structural bay width
+# structural bay = one cluster window. User: the 3 windows of a cluster must look square, so each is as wide as a
+# typical storey's window is tall (FLOOR_H - 0.95 sill - 0.35 head = 2.3 m), plus 2 x 0.5 m panels and a pilaster
+BAY_W = 3 * (FLOOR_H - 1.3) + 2 * 0.5 + PIL_W   # = 8.4 m
 
 BUILD_CONTEXT = False  # roads, neighbours, cars, trees: off while we focus on the building itself
-
-# Gable walls (perpendicular to a wing) get a solid wall with one column of small windows.
-END_EDGES = {frozenset(e) for e in [
-    ('1944623862', '1944623858'), ('1944623880', '1944623872'),
-    ('8158144803', '8158144804'), ('8158144801', '8158144802'),
-    ('8158144799', '8158144800'), ('8158144797', '8158144798'),
-]}
-SIGN_EDGE = frozenset(('8158144801', '8158144802'))  # west wing gable, seen in ref.jpg
-PENTHOUSE_EDGES = [  # (gable edge of the 10-storey part, distance inward, size along edge, size inward, height)
-    (frozenset(('8158144801', '8158144802')), 9.0, 8.0, 7.0, 4.2),
-    (frozenset(('8158144803', '8158144804')), 15.0, 10.0, 12.0, 3.6),
-]
+# (context is still placed from OSM and no longer matches the parametric footprint in layout.py)
 
 
 def level_top(lv):

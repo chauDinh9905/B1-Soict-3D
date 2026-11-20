@@ -69,6 +69,22 @@ class MB:
         return ob
 
 
+def box_uv(ob, size=1.0):
+    """UV chiếu hộp theo tọa độ thế giới (mỗi `size` mét = 1 ô ảnh), cho vật liệu có ảnh."""
+    me = ob.data
+    uv = me.uv_layers.new(name='UVMap')
+    for poly in me.polygons:
+        nx, ny, nz = (abs(c) for c in poly.normal)
+        for li in poly.loop_indices:
+            x, y, z = me.vertices[me.loops[li].vertex_index].co
+            if nz >= max(nx, ny):
+                uv.data[li].uv = (x / size, y / size)
+            elif nx >= ny:
+                uv.data[li].uv = (y / size, z / size)
+            else:
+                uv.data[li].uv = (x / size, z / size)
+
+
 def V3(p, z):
     return (p.x, p.y, z)
 
